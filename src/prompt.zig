@@ -12,8 +12,11 @@ pub const cases = [_]Case{
     },
 };
 
+pub const ResourceCount = u8;
+pub const TurnCount = usize;
+
 pub const Case = struct {
-    turns: usize,
+    turns: TurnCount,
     bp: Blueprint,
 };
 
@@ -29,25 +32,5 @@ pub const Resource = enum {
     }
 };
 
-pub const Counter = Resource.List(usize);
-
-/// Resource costs of building each robot type
+pub const Counter = Resource.List(ResourceCount);
 pub const Blueprint = Resource.List(Counter);
-
-pub const State = struct {
-    turn: usize,
-    resources: Counter = .{0} ** Resource.variant_count,
-    robots: Counter = blk: {
-        var robots: Counter = .{0} ** Resource.variant_count;
-        robots[@intFromEnum(Resource.ore)] = 1; // Start with 1 ore robot;
-        break :blk robots;
-    },
-
-    pub fn produce_resources(state: *State) void {
-        for (state.robots, 0..) |robot, idx| {
-            state.resources[idx] += robot;
-        }
-    }
-
-    pub fn can_buy_robot() !void {}
-};

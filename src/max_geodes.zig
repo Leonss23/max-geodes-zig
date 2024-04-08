@@ -1,18 +1,16 @@
 const std = @import("std");
 const prompt = @import("prompt.zig");
 const Resource = prompt.Resource;
+const ResourceCount = prompt.ResourceCount;
+const Turn = prompt.TurnCount;
 const Blueprint = prompt.Blueprint;
 const Counter = prompt.Counter;
 
-pub fn solution(state: State, ctx: *Context) !usize {
-    // cache
+pub fn solution(state: State, ctx: *Context) !ResourceCount {
     if (ctx.memo.get(state.pack)) |cached|
         if (state.turn >= cached.turn)
             return cached.result;
 
-    // std.log.debug("state: {any}", .{state});
-
-    // base condition
     if (state.turn >= ctx.max_turns) {
         const result = state.pack.resources[@intFromEnum(Resource.geode)];
         try ctx.memo.put(state.pack, .{
@@ -22,7 +20,7 @@ pub fn solution(state: State, ctx: *Context) !usize {
         return result;
     }
 
-    var result: usize = 0;
+    var result: ResourceCount = 0;
     const next_state = state.step();
 
     result = @max(result, try solution(next_state, ctx));
@@ -42,13 +40,13 @@ pub fn solution(state: State, ctx: *Context) !usize {
 
 pub const Context = struct {
     bp: Blueprint,
-    max_turns: usize,
+    max_turns: Turn,
     memo: Cache,
 };
 
 pub const Cached = struct {
-    result: usize,
-    turn: usize,
+    result: ResourceCount,
+    turn: Turn,
 };
 
 pub const Cache = std.AutoHashMap(Pack, Cached);
@@ -60,7 +58,7 @@ pub const Pack = struct {
 
 pub const State = struct {
     pack: Pack = .{},
-    turn: usize = 0,
+    turn: Turn = 0,
 
     pub fn step(self: State) State {
         var state = self;
